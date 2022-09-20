@@ -6,6 +6,8 @@ const app = express();
 const port = 3000;
 
 
+var cors = require('cors')
+app.use(cors());
 
 async function getObject(){
     //To implement -> Must return Promise of {'title': 'blablabla', 'url':'blablabla'}
@@ -19,7 +21,7 @@ async function setObject(obj){
 }
 
 app.get('/', (req, res) => {
-    getObject.then(o => res.send(o));
+    getObject().then(o => res.send(o));
 });
 
 

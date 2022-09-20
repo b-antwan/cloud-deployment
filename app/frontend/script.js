@@ -1,6 +1,6 @@
 
 const myHeader = new Headers({
-    'Access-Control-Allow-Origin': 'http://localhost:8080',
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 });
@@ -16,6 +16,8 @@ async function get() {
             console.log("Error while getting data");
         } else{
             output = await response.json();
+
+            console.log(output);
             
             var title = document.getElementById('title_out');    
             var img = document.getElementById('image');

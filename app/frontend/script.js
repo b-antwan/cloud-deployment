@@ -1,6 +1,6 @@
 
 const myHeader = new Headers({
-    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    //'Access-Control-Allow-Origin': 'http://localhost:3000',
     'Accept': 'application/json',
     'Content-Type': 'application/json'
 });
@@ -12,8 +12,8 @@ async function get() {
         method: 'GET'
     })
     .then(async function(response) {
-        if(response.status === 200){
-            console.log("Error while getting data");
+        if(response.status !== 200){
+            console.log("Error while getting data : " + response.status);
         } else{
             output = await response.json();
 
@@ -30,16 +30,18 @@ async function get() {
 }
 
 async function post() {
+
+    var data = JSON.stringify(
+        {title: document.getElementById('title_in').value, 
+         url: document.getElementById('url_in').value})
     await fetch('//localhost:3000/',
     {
         headers : myHeader,
         method: 'POST',
-        body : JSON.stringify(
-            {'title': document.getElementById('title_in').value, 
-            'url': document.getElementById('url_in').value})
+        body : data
     })
     .then(async function(response) {
-        if(response.status === 200){
+        if(response.status !== 200){
             console.log("Error while posting data from");
         } else{
             document.getElementById('title_in').value = "";

@@ -41,8 +41,7 @@ app.get('/', (req, res) => {
 
 
 app.post('/', (req, res) => {
-    console.log(req.body);
-    setObject(obj).then(o => res.send(o));
+    setObject(req.body).then(o => res.sendStatus(o));
 });
 
 app.listen(port);

@@ -1,5 +1,5 @@
 const express = require('express');
-
+const { exec } = require("child_process");
 
 const app = express();
 
@@ -9,27 +9,64 @@ app.use(bodyParser.json());
 
 const port = 3000;
 
-var cors = require('cors')
+var cors = require('cors');
+const fs = require('fs');
 app.use(cors());
 
-async function getObject(){
+
+var fileData = {};
+
+async function getObject() {
     //Use the command "s3cmd get --force s3://cloudbuck/data.json"
     //then read data.json
+    exec("s3cmd get --force s3://cloudbuck/data.json", (error, stdout, stderr) => {
+        if (error) {
+            console.log(" error : " + error.message);
+        }
+        if (stderr) {
+            console.log(" stderr : " + stderr);
+        }
+        console.log("GET DONE :");
+        console.log(" stdout : " + stdout);
+    });
+    //read data.json and return its contents
+    fileData = JSON.parse(fs.readFileSync('data.json'));
 }
 
-async function setObject(obj){
-    //Write objs to data.json
-    //And use the command:
-    //"s3cmd put s3://cloudbuck/data.json"
+async function setObject(obj) {
+    //write obj to data.json
+    fs.writeFileSync('data.json', JSON.stringify(obj));
+
+    console.log("data.json written");
+    console.log(JSON.parse(fs.readFileSync("data.json")));
+    
+    console.log("Starting put");
+    exec("s3cmd put data.json s3://cloudbuck/data.json", (error, stdout, stderr) => {
+        if (error) {
+            console.log(" error : " + error.message);
+        }
+        if (stderr) {
+            console.log(" stderr : " + stderr);
+        }
+        console.log("SET DONE :");
+
+        console.log(" stdout : " + stdout);
+    });
     return 200;
 }
 
+setObject({ title: "test", url: "testqoqeoq" }).then(() => {
+    getObject().then(() => {
+        console.log(" hehe ");
+        console.log(fileData);
+    });
+});
+
 app.get('/', (req, res) => {
-    /*getObject().then(o => {
-        console.log(o)
-        res.status(200).send(o)
-    });*/
-    res.status(200).json({'title': 'My awesome timer', 'url': 'https://www.giantfreakinrobot.com/wp-content/uploads/2022/08/rick-astley.jpg'});
+    getObject().then(() => {
+        console.log(fileData);
+        res.send(fileData);
+    });
 });
 
 

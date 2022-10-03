@@ -14,7 +14,7 @@ Made by Thomas Dagier for Cloud course at HES-SO Master
 - apt update -y
 - apt instal node -y
 - apt install npm -y
-- export AZURE_STORAGE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=cloudlab1;AccountKey=Dj7nJbfXaUy+U8+WEgfX0yB/wJ0k+havtFTLkuZIKAUuAuj+5T6wflQJ5zpQSNxUNrCfTnCZZsLe+AStlP02Vg==;EndpointSuffix=core.windows.net"
+- export AZURE_STORAGE_CONNECTION_STRING=...
 - npm install
 - node index.js
 
@@ -25,7 +25,7 @@ Made by Thomas Dagier for Cloud course at HES-SO Master
 
 ### Automatic deployment
 
-- export AZURE_SUBSCRIPTION_ID=f0514094-5bb5-4925-9323-de8fc229bb63
+- export AZURE_SUBSCRIPTION_ID=...
 - pip install -r requirements.txt
 - python3 startup.py
 

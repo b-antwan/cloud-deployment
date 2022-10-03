@@ -22,15 +22,13 @@ resource_client = ResourceManagementClient(credential, subscription_id)
 
 # Constants we need in multiple places: the resource group name and the region
 # in which we provision resources. You can change these values however you want.
-RESOURCE_GROUP_NAME = "backend_group_10101532"
-LOCATION = "France Central"
+RESOURCE_GROUP_NAME = "banantwan_group"
+LOCATION = "westeurope"
 
 # Provision the resource group.
-rg_result = resource_client.resource_groups.create_or_update(RESOURCE_GROUP_NAME,
-    {
+rg_result = resource_client.resource_groups.create_or_update(RESOURCE_GROUP_NAME, {
         "location": LOCATION
-    }
-)
+    })
 
 
 # For details on the previous code, see Example: Provision a resource group
@@ -128,7 +126,7 @@ poller = compute_client.virtual_machines.begin_create_or_update(RESOURCE_GROUP_N
             },
             "storageProfile": {
                 "imageReference": {
-                    "id": "/subscriptions/f0514094-5bb5-4925-9323-de8fc229bb63/resourceGroups/backend_group_10101532/providers/Microsoft.Compute/galleries/backend_gallery/images/backend_image"
+                    "id": "/subscriptions/f0514094-5bb5-4925-9323-de8fc229bb63/resourceGroups/backend_group_10101532/providers/Microsoft.Compute/galleries/lab1_gallery/images/backend_image"
                 },                           
                 "osDisk": {
                     "caching": "ReadWrite",
@@ -153,6 +151,7 @@ poller = compute_client.virtual_machines.begin_create_or_update(RESOURCE_GROUP_N
                     }
                 }]
             },
+            "userData": str(base64.b64encode(bytes('#cloud-config\nruncmd:\n - cd /home/thomas/backend/\n - node server.js', 'utf-8')))[2:-1]
         }                                                                      
     }
 )
@@ -164,7 +163,7 @@ print(f"Provisioned virtual machine {vm_result.name}")
 print(f"\nProvisioning frontend... some operations might take a minute or two.")
 
 # Acquire a credential object using CLI-based authentication.
-credential = DefaultAzureCredential()
+credential = AzureCliCredential()
 
 # Retrieve subscription ID from environment variable.
 subscription_id = os.environ["AZURE_SUBSCRIPTION_ID"]
@@ -177,7 +176,7 @@ resource_client = ResourceManagementClient(credential, subscription_id)
 # Constants we need in multiple places: the resource group name and the region
 # in which we provision resources. You can change these values however you want.
 RESOURCE_GROUP_NAME = "frontend_group_10101527"
-LOCATION = "France Central"
+LOCATION = "westeurope"
 
 # Provision the resource group.
 rg_result = resource_client.resource_groups.create_or_update(RESOURCE_GROUP_NAME,
@@ -281,7 +280,7 @@ poller = compute_client.virtual_machines.begin_create_or_update(RESOURCE_GROUP_N
             },
             "storageProfile": {
                 "imageReference": {
-                    "id": "/subscriptions/f0514094-5bb5-4925-9323-de8fc229bb63/resourceGroups/frontend_group_10101527/providers/Microsoft.Compute/galleries/frontend_gallery/images/frontend_image"
+                    "id": "/subscriptions/f0514094-5bb5-4925-9323-de8fc229bb63/resourceGroups/frontend_group_10101527/providers/Microsoft.Compute/galleries/lab1_gallery/images/frontend_image"
                 },                           
                 "osDisk": {
                     "caching": "ReadWrite",

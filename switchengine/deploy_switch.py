@@ -1,15 +1,16 @@
 import openstack
 import errno
 import os
+import subprocess
+import base64
 
-
-IMAGE_NAME = "d224ca33-1d62-4e5c-9e91-acc10e383674"  
+IMAGE_NAME = "Ubuntu Bionic 18.04 (SWITCHengines)"  
 FLAVOR_NAME = "m1.small"
 NETWORK_NAME = "private"
 KEYPAIR_NAME = "ssh_key"
-SSH_DIR = '{home}/.ssh'.format(home=os.path.expanduser("~"))
-PRIVATE_KEYPAIR_FILE = '{ssh_dir}id_rsa.{key}'.format(
-    ssh_dir=SSH_DIR, key=KEYPAIR_NAME)
+SSH_DIR = '{home}/.ssh/'.format(home=os.path.expanduser("~"))
+PRIVATE_KEYPAIR_FILE = '{ssh_dir}ssh_key.pem'.format(
+    ssh_dir=SSH_DIR)
 
 
 def create_keypair(conn):
@@ -36,37 +37,23 @@ def create_keypair(conn):
     return keypair
 
 
-def create_server(conn, server_name, security_group):
+def create_server(conn, server_name):
     
     image = conn.compute.find_image(IMAGE_NAME)
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
     keypair = create_keypair(conn)
-    print(image)
+    
+    
     server = conn.compute.create_server(
         name=server_name, image_id=image.id, flavor_id=flavor.id,
-        networks=[{"uuid": network.id}], key_name=keypair.name,
+        networks=[{"uuid": network.id}], key_name=keypair.name, security_groups = [{"name": "ssh"}], 	
     )
     server = conn.compute.wait_for_server(server)
-
-    conn.compute.add_security_group_to_server(server, security_group=add_security_group(conn, "SSH"))
-    conn.compute.add_security_group_to_server(server, security_group=add_security_group(conn, security_group))
-    conn.compute.add_floating_ip_to_server(server, get_floating_ip(conn))
-    return server
-
-def add_security_group(conn, security_group_name):
-    security_group = conn.network.add_security_group(security_group_name)
-    return security_group
-
-def create_rule_ssh(port, security_group_id):
-    return conn.network.create_security_group_rule(direction="ingress",ether_type="IPv4",port_range_min=port, port_range_max=port,protocol="tcp", security_group_id=security_group_id)
-
-
-def create_security_group_ssh(conn):
-    security_group = conn.network.create_security_group(name="SSH")
-    security_group_rule = create_rule_ssh(22, security_group.id)
-    return security_group
-
+    ip = get_floating_ip(conn)
+    conn.compute.add_floating_ip_to_server(server, ip)
+    
+    return server,ip
 
 def get_network_id(network_name):
     network = conn.network.find_network(network_name)
@@ -93,11 +80,17 @@ def list_servers(conn):
     for server in conn.compute.servers():
         print(server)
 
-
 if __name__ == '__main__':
-    conn = create_connection_from_config()
-    front_server = create_server(conn=conn, server_name="test", security_group='SSH')
-    front_server = conn.compute.find_server(front_server.id)
+    conn = create_connection_from_config()        
+    front_server = create_server(conn=conn, server_name="Front")
+    ip_front = front_server[1]
+    print("Frontend instance IP :" + ip_front)
+    print("scp -r -i ~/.ssh/ssh_key.pem ./app/frontend/ ubuntu@" + ip_front+ ":")
+    print()
+    back_server = create_server(conn=conn, server_name="Back")
+    ip_back = back_server[1]
+    print("Backend instance IP :" + ip_back)
+    print("scp -r -i ~/.ssh/ssh_key.pem ./app/backend/ ubuntu@" + ip_back+ ":")
    
 
     

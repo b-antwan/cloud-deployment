@@ -1,3 +1,4 @@
+from re import sub
 import openstack
 import errno
 import os
@@ -37,12 +38,12 @@ def create_keypair(conn):
     return keypair
 
 
-def create_server(conn, server_name):
+def create_server(conn, server_name,my_keypair):
     
     image = conn.compute.find_image(IMAGE_NAME)
     flavor = conn.compute.find_flavor(FLAVOR_NAME)
     network = conn.network.find_network(NETWORK_NAME)
-    keypair = create_keypair(conn)
+    keypair = my_keypair
     
     
     server = conn.compute.create_server(
@@ -82,15 +83,18 @@ def list_servers(conn):
 
 if __name__ == '__main__':
     conn = create_connection_from_config()        
-    front_server = create_server(conn=conn, server_name="Front")
-    ip_front = front_server[1]
-    print("Frontend instance IP :" + ip_front)
-    print("scp -r -i ~/.ssh/ssh_key.pem ./app/frontend/ ubuntu@" + ip_front+ ":")
-    print()
-    back_server = create_server(conn=conn, server_name="Back")
+    my_keypair = create_keypair(conn)
+    back_server = create_server(conn=conn, server_name="Back",my_keypair=my_keypair)
     ip_back = back_server[1]
     print("Backend instance IP :" + ip_back)
     print("scp -r -i ~/.ssh/ssh_key.pem ./app/backend/ ubuntu@" + ip_back+ ":")
-   
-
+    
+    front_server = create_server(conn=conn, server_name="Front",my_keypair=my_keypair)
+    ip_front = front_server[1]
+    print("Frontend instance IP :" + ip_front)
+    p2 = subprocess.Popen('sed -i "1c\const backaddr = \\\"http:\\/\\/' +  ip_back  + '\\\";" ./app/frontend/script.js',shell=True)
+    sts2 = p2.wait()
+    print("scp -r -i ~/.ssh/ssh_key.pem ./app/frontend/ ubuntu@" + ip_front+ ":")
+    print()
+    
     

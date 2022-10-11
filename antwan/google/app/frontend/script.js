@@ -1,4 +1,4 @@
-const backaddr = "http://86.119.32.139";
+const backaddr = "http://localhost";
 
 const myHeader = new Headers({
     'Access-Control-Allow-Origin': backaddr+':3000',

@@ -54,7 +54,7 @@ def create_instance(compute, project, zone, name, bucket, image, scrypt):
                 'boot': True,
                 'autoDelete': True,
                 'initializeParams': {
-                    'sourceImage': "projects/probable-skill-327415/global/images/" + image,
+                    'sourceImage': "projects/"+ project +"/global/images/" + image,
                 }
             }
         ],

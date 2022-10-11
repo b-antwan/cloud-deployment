@@ -1,3 +1,3 @@
 #!/bin/bash
-cd /home/antoine_blancy/
+cd /home/antoine_blancy
 node index.js

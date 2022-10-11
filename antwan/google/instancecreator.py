@@ -26,7 +26,6 @@ import os
 import time
 
 import googleapiclient.discovery
-from six.moves import input
 
 
 # [START list_instances]
@@ -122,12 +121,12 @@ def get_external_ip(compute, project, zone, name):
         instance = name).execute()
 
 def write_frontend_sh(ip):
-    f = open("back.sh", "w")
+    f = open("front.sh", "w")
     f.write("#!/bin/bash\n")
     f.write("cd /home/antoine_blancy\n")
     #sed -i '1c\const backddr = "130.211.201.255";' script.js
-    f.write("sed -i '1c\const backddr = \"" + ip + "\";' script.js\n")
-    f.write("pyton3 -m http.server")
+    f.write("sed -i '1c\const backaddr = \"http://" + ip + "\";' script.js\n")
+    f.write("python3 -m http.server")
     f.close()
 
     
@@ -136,11 +135,11 @@ if __name__ == '__main__':
     project = "cloud-dep"
     zone = "europe-west6-a"
     bucket = ""
-    instance_name = ["frontdndnd", "backdndnd"]
-    name = ["vm-front", "vm-back"]
-    imagename = ["frontendtemp","backendtemp"]
+    instance_name = ["backdndndo", "frontdndndo"]
+    name = ["vm-back", "vm-front"]
+    imagename = ["backendtemp", "frontendtemp"]
 
-    operation = create_instance(compute, project, zone, instance_name[0], bucket, imagename[0], "front.sh")
+    operation = create_instance(compute, project, zone, instance_name[0], bucket, imagename[0], "back.sh")
     wait_for_operation(compute, project, zone, operation['name'])
 
     #modify startup script for backend ip in frontend
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     print(info['networkInterfaces'][0]['accessConfigs'][0]['natIP'])
     write_frontend_sh(info['networkInterfaces'][0]['accessConfigs'][0]['natIP'])
 
-    operation = create_instance(compute, project, zone, instance_name[1], bucket, imagename[1],"startup-script-backend.sh")
+    operation = create_instance(compute, project, zone, instance_name[1], bucket, imagename[1],"front.sh")
     wait_for_operation(compute, project, zone, operation['name'])
 
     info = get_external_ip(compute, project, zone, instance_name[1])
